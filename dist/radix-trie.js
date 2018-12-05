@@ -59,7 +59,7 @@ class RadixTrie {
 
       for (let i = 0; i < currentNodeRef.length; i++) {
         const nodeReferenceKeyLength = currentNodeRef[i].key.length;
-        const prefix = this.getPrefix(currentNodeRef[i], key);
+        const prefix = this.getPrefix(currentNodeRef[i], keyLowercase);
         const prefixLength = prefix.length;
 
         if (prefixLength == 0) {
@@ -109,37 +109,31 @@ class RadixTrie {
     while (!foundFlag) {
       // Look to current node reference
       const currentNodeRef = currNode.ref;
+      let noSamePrefix = true;
 
       for (let i = 0; i < currentNodeRef.length; i++) {
         const nodeReferenceKeyLength = currentNodeRef[i].key.length;
-        let index = -1;
-        for (let j = 0, k = 0; j < keyLowercase.length && k < currentNodeRef[i].key.length; j++ , k++) {
-          const buf1 = Buffer.from(keyLowercase[j]);
-          const buf2 = Buffer.from(currentNodeRef[i].key[k]);
+        const prefix = this.getPrefix(currentNodeRef[i], keyLowercase);
+        const prefixLength = prefix.length;
 
-          if (buf1.compare(buf2) != 0) {
-            break;
-          }
-          index = j;
-        }
-
-        if (index < 0) {
+        if (prefixLength == 0) {
           continue;
         }
 
         if (keyLowercase === currentNodeRef[i].key) { // found
           return currentNodeRef[i].value;
         } else if (keyLowercase.length > nodeReferenceKeyLength) {
-          keyLowercase = keyLowercase.slice(index + 1);
+          keyLowercase = keyLowercase.slice(prefixLength);
           currNode = currentNodeRef[i];
+          noSamePrefix = false;
           break;
         }
+      }
 
-        foundFlag = true;
+      if (noSamePrefix == true) {  // ex: "abcdef" => "daefasd"  key is not exist
+        return null;
       }
     }
-
-    return null;  // ex: "abcdef" => "daefasd"  key is not exist
   }
 
   delete(key) {
@@ -154,30 +148,22 @@ class RadixTrie {
     while (!foundFlag) {
       // Look to current node reference
       const currentNodeRef = currNode.ref;
+      let noSamePrefix = true;
 
       for (let i = 0; i < currentNodeRef.length; i++) {
         const nodeReferenceKeyLength = currentNodeRef[i].key.length;
+        const prefix = this.getPrefix(currentNodeRef[i], keyLowercase);
+        const prefixLength = prefix.length;
 
-        let index = -1;
-        for (let j = 0, k = 0; j < keyLowercase.length && k < currentNodeRef[i].key.length; j++ , k++) {
-          const buf1 = Buffer.from(keyLowercase[j]);
-          const buf2 = Buffer.from(currentNodeRef[i].key[k]);
-
-          if (buf1.compare(buf2) != 0) {
-            break;
-          }
-          index = j;
-        }
-
-        if (index < 0) {
+        if (prefixLength == 0) {
           continue;
         }
 
         if (keyLowercase === currentNodeRef[i].key) { // found
           // Condition 1 => Not a prefix node, a leaf node then delete node
           if (currentNodeRef[i].ref.length == 0) {
-            // return currentNodeRef.splice(i, 1);
             currentNodeRef.splice(i, 1);
+            return true;
           }
 
           // Condition 2 => It is a prefix node, unmark node
@@ -190,16 +176,19 @@ class RadixTrie {
 
           return true;
         } else if (keyLowercase.length > nodeReferenceKeyLength) {
-          keyLowercase = keyLowercase.slice(index + 1);
+          keyLowercase = keyLowercase.slice(prefixLength);
           currNode = currentNodeRef[i];
+          noSamePrefix = false;
           break;
-        }
+        } 
+      }
 
-        foundFlag = true;
+      if (noSamePrefix == true) {
+        break;
       }
     }
 
-    return null;  // ex: "abcdef" => "daefasd"  key is not exist
+    return null;
   }
 
   getPrefix(node, key) {
