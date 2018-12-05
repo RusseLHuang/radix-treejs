@@ -17,3 +17,14 @@ console.time('start');
 const result = radix.search(args[0]);
 console.log(result);
 console.timeEnd('start');
+
+// radix.insert("abdcasd", 12)
+
+// const r = new Radix();
+// r.insert("abc", 123);
+// r.insert("abcd", 123);
+// r.insert("abc", 1234);
+// r.insert("abcd", 12341122 );
+// r.insert("ddd", 1234);
+// console.log(r.root);
+// console.log(r.root.ref[0]);
