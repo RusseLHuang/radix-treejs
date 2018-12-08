@@ -169,6 +169,8 @@ class RadixTrie {
           // Condition 2 => It is a prefix node, unmark node
           if (currentNodeRef[i].ref.length == 1) {
             const childNode = currentNodeRef[i].ref[0];
+            const concatenatedKey = `${currentNodeRef[i].key}${childNode.key}`
+            childNode.changeKey(concatenatedKey);
             currentNodeRef[i] = childNode;
           } else {
             currentNodeRef[i].changeValue(null);
